@@ -6,9 +6,10 @@ const Button = ({ onClick, text }) => {
 
 const StatisticLine = ({ text, value }) => {
   return (
-    <div>
-      {text} {value}
-    </div>
+    <tr>
+      <td>{text}</td>
+      <td>{value}</td>
+    </tr>
   );
 };
 
@@ -21,14 +22,16 @@ const Statistics = ({ good, neutral, bad, all }) => {
   const positiveaverage = ((good / all) * 100).toPrecision(14);
 
   return (
-    <div>
-      <StatisticLine text="good" value={good} />
-      <StatisticLine text="neutral" value={neutral} />
-      <StatisticLine text="bad" value={bad} />
-      <StatisticLine text="all" value={all} />
-      <StatisticLine text="average" value={average} />
-      <StatisticLine text="positive" value={`${positiveaverage} %`} />
-    </div>
+    <table>
+      <tbody>
+        <StatisticLine text="good" value={good} />
+        <StatisticLine text="neutral" value={neutral} />
+        <StatisticLine text="bad" value={bad} />
+        <StatisticLine text="all" value={all} />
+        <StatisticLine text="average" value={average} />
+        <StatisticLine text="positive" value={`${positiveaverage} %`} />
+      </tbody>
+    </table>
   );
 };
 
