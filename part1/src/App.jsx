@@ -2,11 +2,20 @@ import { useState } from "react";
 
 const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>;
 
-const History = (props) => {
-  if (props.allClicks.length === 0) {
-    return <div>the app is used by pressing the buttons</div>;
-  }
-  return <div>button press history: {props.allClicks.join(" ")}</div>;
+const Statistics = ({ good, neutral, bad, all }) => {
+  const average = all === 0 ? 0 : (good * 1 + neutral * 0 + bad * -1) / all;
+  const positive = all === 0 ? 0 : ((good / all) * 100).toPrecision(14);
+
+  return (
+    <div>
+      <div>good {good}</div>
+      <div>neutral {neutral}</div>
+      <div>bad {bad}</div>
+      <div>all {all}</div>
+      <div>average {average}</div>
+      <div>positive {positive} % </div>
+    </div>
+  );
 };
 
 const App = () => {
@@ -30,22 +39,6 @@ const App = () => {
     setAllClicks(all + 1);
   };
 
-  const Average = () => {
-    if (all === 0) {
-      return 0;
-    }
-    const Average = (good * 1 + neutral * 0 + bad * -1) / all;
-    return Average;
-  };
-
-  const PositiveFeedback = () => {
-    if (all === 0) {
-      return 0;
-    }
-    const positiveFeedback = (good / all) * 100;
-    return positiveFeedback.toPrecision(14);
-  };
-
   return (
     <div>
       <h1>give feedback</h1>
@@ -54,12 +47,7 @@ const App = () => {
       <Button onClick={handleBadClick} text="bad" />
 
       <h1>statistics</h1>
-      <div>good {good}</div>
-      <div>neutral {neutral}</div>
-      <div>bad {bad}</div>
-      <div>all {all}</div>
-      <div>average {Average()}</div>
-      <div>positive {PositiveFeedback()} % </div>
+      <Statistics good={good} neutral={neutral} bad={bad} all={all} />
     </div>
   );
 };
