@@ -46,6 +46,17 @@ const App = () => {
     setNewNumber(event.target.value);
   };
 
+  const handleDelete = (id) => {
+    const person = persons.find((p) => p.id === id);
+    if (!person) return;
+    const confirmDelete = window.confirm(`Delete ${person.name}?`);
+    if (!confirmDelete) return;
+
+    personService.remove(id).then(() => {
+      setPersons((prevPersons) => prevPersons.filter((p) => p.id !== id));
+    });
+  };
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -73,7 +84,7 @@ const App = () => {
         onSubmit={addEntry}
       />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} handleDelete={handleDelete} />
     </div>
   );
 };
