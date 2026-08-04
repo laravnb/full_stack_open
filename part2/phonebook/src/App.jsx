@@ -3,20 +3,21 @@ import axios from "axios";
 import Filter from "./components/filter";
 import PersonForm from "./components/form";
 import Persons from "./components/persons";
+import personService from "./services/numbers";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
-
-  const hook = () => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
-    });
-  };
-  useEffect(hook, []);
-
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    personService.getAll().then((initialNumbers) => {
+      setPersons(initialNumbers);
+    });
+  }, []);
+
+  console.log("render", persons.length, "persons");
 
   const addEntry = (event) => {
     event.preventDefault();
@@ -29,11 +30,13 @@ const App = () => {
     const nameObject = {
       name: newName,
       number: newNumber,
-      id: String(persons.length + 1),
     };
-    setPersons(persons.concat(nameObject));
-    setNewName("");
-    setNewNumber("");
+
+    personService.create(nameObject).then((returnedNumber) => {
+      setPersons((prevPersons) => prevPersons.concat(returnedNumber));
+      setNewName("");
+      setNewNumber("");
+    });
   };
   const handleNameChange = (event) => {
     setNewName(event.target.value);
