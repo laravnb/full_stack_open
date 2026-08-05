@@ -4,12 +4,14 @@ import Filter from "./components/filter";
 import PersonForm from "./components/form";
 import Persons from "./components/persons";
 import personService from "./services/numbers";
+import Notification from "./components/notifications";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((initialNumbers) => {
@@ -33,6 +35,10 @@ const App = () => {
     };
 
     personService.create(nameObject).then((returnedNumber) => {
+      setSuccessMessage(`Added ${returnedNumber.name}`);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
       setPersons((prevPersons) => prevPersons.concat(returnedNumber));
       setNewName("");
       setNewNumber("");
@@ -53,6 +59,10 @@ const App = () => {
     if (!confirmDelete) return;
 
     personService.remove(id).then(() => {
+      setSuccessMessage(`Deleted ${person.name}`);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
       setPersons((prevPersons) => prevPersons.filter((p) => p.id !== id));
     });
   };
@@ -70,6 +80,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={successMessage} />
       <Filter
         value={searchTerm}
         onChange={handleSearchChange}
