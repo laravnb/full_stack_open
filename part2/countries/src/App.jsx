@@ -7,6 +7,7 @@ import Countries from "./components/countries";
 const App = () => {
   const [countries, setCountries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCountryName, setSelectedCountryName] = useState(null);
 
   useEffect(() => {
     countryService.getAll().then((initialCountries) => {
@@ -14,22 +15,24 @@ const App = () => {
     });
   }, []);
 
-  console.log("render", countries.length, "countries");
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
   const filteredCountries = searchTerm
     ? countries.filter((country) =>
         country.name.common.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : [];
 
-  const countryMaxExceeded = filteredCountries.length > 10;
-  const tooManyMatchesMessage =
-    countryMaxExceeded && "Too many matches, specify";
-  const countriesToShow = countryMaxExceeded ? [] : filteredCountries;
+  useEffect(() => {
+    if (
+      selectedCountryName &&
+      !filteredCountries.some((country) => country.name.common === selectedCountryName)
+    ) {
+      setSelectedCountryName(null);
+    }
+  }, [filteredCountries, selectedCountryName]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
   return (
     <div>
@@ -38,11 +41,12 @@ const App = () => {
         onChange={handleSearchChange}
         text="find countries"
       />
-      {tooManyMatchesMessage ? (
-        <div>{tooManyMatchesMessage}</div>
-      ) : (
-        <Countries countries={countriesToShow} />
-      )}
+      <Countries
+        countries={filteredCountries}
+        selectedCountryName={selectedCountryName}
+        onSelectCountry={setSelectedCountryName}
+        onClearSelection={() => setSelectedCountryName(null)}
+      />
     </div>
   );
 };
