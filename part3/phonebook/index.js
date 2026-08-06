@@ -1,7 +1,10 @@
 const express = require("express");
+const morgan = require("morgan");
+
 const app = express();
 
 app.use(express.json());
+app.use(morgan("tiny"));
 
 let entries = [
   {
@@ -27,7 +30,7 @@ let entries = [
 ];
 
 app.get("/api/persons", (request, response) => {
-  response.json(entries);
+  response.send(entries);
 });
 
 app.get("/api/info", (request, response) => {
