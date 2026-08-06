@@ -77,7 +77,7 @@ app.post("/api/persons", (request, response) => {
   const nameExists = entries.find((person) => person.name === body.name);
   if (nameExists) {
     return response.status(400).json({
-      error: "name already exists",
+      error: "name must be unique",
     });
   }
 
