@@ -1,9 +1,11 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QxIiwiaWQiOiI2YTdjNmUyMDI4YmE5MjFiMzQ5ZWExNGUiLCJpYXQiOjE3ODY1NDE0MzR9.SM-zyupK33B92STE92rEdARqOp6KJHmgOcDKa_GSPo0
 
 {
-  "title": "How to make a music video",
-  "author": "Edda",
-  "url": "https://fancy",
-  "likes": "500000"
+  "title": "How to dance",
+  "author": "Boris",
+  "url": "https://cars1234",
+  "likes": "333345",
+  "userId": "6a7c6e2028ba921b349ea14e"
 }

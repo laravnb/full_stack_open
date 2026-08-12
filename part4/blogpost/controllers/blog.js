@@ -1,10 +1,23 @@
 const blogRouter = require("express").Router();
 const Blog = require("../models/blog");
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+
+const getTokenFrom = (request) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.startsWith("Bearer ")) {
+    return authorization.replace("Bearer ", "");
+  }
+  return null;
+};
 
 blogRouter.get("/", async (request, response, next) => {
   try {
-    const blogs = await Blog.find({});
-    response.json(blogs);
+    const blogs = await Blog.find({}).populate("user", {
+      username: 1,
+      name: 1,
+    });
+    response.json(blogs.map((blog) => blog.toJSON()));
   } catch (error) {
     console.log("The error is:", error);
     next(error);
@@ -15,8 +28,16 @@ blogRouter.post("/", async (request, response, next) => {
   try {
     const body = request.body;
 
-    if (!body.title || !body.url) {
-      return response.status(400).json({ error: "title and url are required" });
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: "token invalid" });
+    }
+    const user = await User.findById(decodedToken.id);
+
+    if (!body.title || !body.url || !body.userId) {
+      return response
+        .status(400)
+        .json({ error: "title, url and userId are required" });
     }
 
     const blog = new Blog({
@@ -24,10 +45,11 @@ blogRouter.post("/", async (request, response, next) => {
       author: body.author,
       url: body.url,
       likes: body.likes || 0,
+      user: body.userId,
     });
 
     const savedBlog = await blog.save();
-    response.status(201).json(savedBlog);
+    response.status(201).json(savedBlog.toJSON());
   } catch (error) {
     console.log("The error is:", error);
     next(error);
@@ -38,7 +60,7 @@ blogRouter.get("/:id", async (request, response, next) => {
   try {
     const blog = await Blog.findById(request.params.id);
     if (blog) {
-      response.json(blog);
+      response.json(blog.toJSON());
     } else {
       response.status(404).end();
     }
@@ -71,10 +93,12 @@ blogRouter.put("/:id", async (request, response, next) => {
 
     const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {
       new: true,
+      runValidators: true,
+      context: "query",
     });
 
     if (updatedBlog) {
-      response.json(updatedBlog);
+      response.json(updatedBlog.toJSON());
     } else {
       response.status(404).end();
     }
