@@ -1,0 +1,9 @@
+PUT http://localhost:3003/api/blogs/6a79e64c915e70da06c784a6
+Content-Type: application/json
+
+{
+  "title": "How to make a music video",
+  "author": "Edda",
+  "url": "https://fancy",
+  "likes": "1000000"
+}
