@@ -114,7 +114,8 @@ const App = () => {
 
   return (
     <div>
-      <Notification message={errorMessage} />
+      <Notification message={errorMessage} type="error" />
+      <Notification message={successMessage} type="success" />
 
       {!user && loginForm()}
       {user && (
