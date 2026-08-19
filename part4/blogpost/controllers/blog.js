@@ -34,10 +34,8 @@ blogRouter.post("/", async (request, response, next) => {
     }
     const user = await User.findById(decodedToken.id);
 
-    if (!body.title || !body.url || !body.userId) {
-      return response
-        .status(400)
-        .json({ error: "title, url and userId are required" });
+    if (!body.title || !body.url) {
+      return response.status(400).json({ error: "title and url are required" });
     }
 
     const blog = new Blog({
@@ -45,10 +43,13 @@ blogRouter.post("/", async (request, response, next) => {
       author: body.author,
       url: body.url,
       likes: body.likes || 0,
-      user: body.userId,
+      user: user._id,
     });
 
     const savedBlog = await blog.save();
+    user.blogs = user.blogs.concat(savedBlog._id);
+    await user.save();
+
     response.status(201).json(savedBlog.toJSON());
   } catch (error) {
     console.log("The error is:", error);

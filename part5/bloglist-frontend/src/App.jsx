@@ -3,13 +3,18 @@ import Notification from "./components/Notification";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import BlogForm from "./components/form";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
+  const [newTitle, setNewTitle] = useState("");
+  const [newAuthor, setNewAuthor] = useState("");
+  const [newUrl, setNewUrl] = useState("");
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -75,6 +80,38 @@ const App = () => {
     setUser(null);
   };
 
+  const addEntry = (event) => {
+    event.preventDefault();
+
+    const blogObject = {
+      title: newTitle,
+      author: newAuthor,
+      url: newUrl,
+    };
+
+    blogService.create(blogObject).then((returnedBlog) => {
+      setSuccessMessage(`Added ${returnedBlog.title}`);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      setBlogs((prevBlogs) => prevBlogs.concat(returnedBlog));
+      setNewTitle("");
+      setNewAuthor("");
+      setNewUrl("");
+    });
+  };
+  const handleTitleChange = (event) => {
+    setNewTitle(event.target.value);
+  };
+
+  const handleAuthorChange = (event) => {
+    setNewAuthor(event.target.value);
+  };
+
+  const handleUrlChange = (event) => {
+    setNewUrl(event.target.value);
+  };
+
   return (
     <div>
       <Notification message={errorMessage} />
@@ -87,6 +124,16 @@ const App = () => {
             {user.name} logged in{" "}
             <button onClick={handleLogout}> logout</button>
           </p>
+          <h2>create new</h2>
+          <BlogForm
+            title={newTitle}
+            author={newAuthor}
+            url={newUrl}
+            onTitleChange={handleTitleChange}
+            onAuthorChange={handleAuthorChange}
+            onUrlChange={handleUrlChange}
+            onSubmit={addEntry}
+          />
           {blogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
           ))}
