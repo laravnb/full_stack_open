@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Notification from "./components/Notification";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import BlogForm from "./components/form";
+import LoginForm from "./components/login";
+import Togglable from "./components/togglable";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -12,9 +14,7 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [newTitle, setNewTitle] = useState("");
-  const [newAuthor, setNewAuthor] = useState("");
-  const [newUrl, setNewUrl] = useState("");
+  const blogFormRef = useRef();
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -47,69 +47,21 @@ const App = () => {
     }
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <h2>Log in to application</h2>
-      <div>
-        <label>
-          username
-          <input
-            type="text"
-            value={username}
-            onChange={({ target }) => setUsername(target.value)}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          password
-          <input
-            type="password"
-            value={password}
-            onChange={({ target }) => setPassword(target.value)}
-          />
-        </label>
-      </div>
-      <button type="submit">login</button>
-    </form>
-  );
-
   const handleLogout = async (event) => {
     window.localStorage.removeItem("loggedBlogappUser");
     blogService.setToken(null);
     setUser(null);
   };
 
-  const addEntry = (event) => {
-    event.preventDefault();
-
-    const blogObject = {
-      title: newTitle,
-      author: newAuthor,
-      url: newUrl,
-    };
-
+  const addBlog = (blogObject) => {
+    blogFormRef.current.toggleVisibility();
     blogService.create(blogObject).then((returnedBlog) => {
       setSuccessMessage(`Added ${returnedBlog.title}`);
       setTimeout(() => {
         setSuccessMessage(null);
       }, 5000);
-      setBlogs((prevBlogs) => prevBlogs.concat(returnedBlog));
-      setNewTitle("");
-      setNewAuthor("");
-      setNewUrl("");
+      setBlogs(blogs.concat(returnedBlog));
     });
-  };
-  const handleTitleChange = (event) => {
-    setNewTitle(event.target.value);
-  };
-
-  const handleAuthorChange = (event) => {
-    setNewAuthor(event.target.value);
-  };
-
-  const handleUrlChange = (event) => {
-    setNewUrl(event.target.value);
   };
 
   return (
@@ -117,7 +69,19 @@ const App = () => {
       <Notification message={errorMessage} type="error" />
       <Notification message={successMessage} type="success" />
 
-      {!user && loginForm()}
+      {!user && (
+        <div>
+          <Togglable buttonLabel="login">
+            <LoginForm
+              username={username}
+              password={password}
+              handleUsernameChange={({ target }) => setUsername(target.value)}
+              handlePasswordChange={({ target }) => setPassword(target.value)}
+              handleSubmit={handleLogin}
+            />
+          </Togglable>
+        </div>
+      )}
       {user && (
         <div>
           <h2>blogs</h2>
@@ -125,16 +89,9 @@ const App = () => {
             {user.name} logged in{" "}
             <button onClick={handleLogout}> logout</button>
           </p>
-          <h2>create new</h2>
-          <BlogForm
-            title={newTitle}
-            author={newAuthor}
-            url={newUrl}
-            onTitleChange={handleTitleChange}
-            onAuthorChange={handleAuthorChange}
-            onUrlChange={handleUrlChange}
-            onSubmit={addEntry}
-          />
+          <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+            <BlogForm createBlog={addBlog} />
+          </Togglable>
           {blogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
           ))}
