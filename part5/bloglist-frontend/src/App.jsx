@@ -69,6 +69,25 @@ const App = () => {
     setBlogs(blogs.map((blog) => (blog.id !== id ? blog : returnedBlog)));
   };
 
+  const handleDelete = (blog) => {
+    const confirmDelete = window.confirm(
+      `Remove blog ${blog.title} by ${blog.author}?`,
+    );
+    if (!confirmDelete) return;
+
+    blogService
+      .remove(blog.id)
+      .then(() => {
+        setSuccessMessage(`Deleted ${blog.title}`);
+        setTimeout(() => setSuccessMessage(null), 5000);
+        setBlogs((prevBlogs) => prevBlogs.filter((b) => b.id !== blog.id));
+      })
+      .catch((error) => {
+        setErrorMessage("Failed to delete blog");
+        setTimeout(() => setErrorMessage(null), 5000);
+      });
+  };
+
   return (
     <div>
       <Notification message={errorMessage} type="error" />
@@ -100,7 +119,12 @@ const App = () => {
           {[...blogs]
             .sort((a, b) => b.likes - a.likes)
             .map((blog) => (
-              <Blog key={blog.id} blog={blog} addLike={addLike} />
+              <Blog
+                key={blog.id}
+                blog={blog}
+                addLike={addLike}
+                handleDelete={handleDelete}
+              />
             ))}
         </div>
       )}
